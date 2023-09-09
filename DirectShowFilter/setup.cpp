@@ -9,7 +9,7 @@
 #include <streams.h>
 #include <initguid.h>
 
-#include "ps3eye.h"
+#include "ps3eye.hpp"
 #include "PS3EyeSourceFilter.h"
 #include "PS3EyeGuids.h"
 

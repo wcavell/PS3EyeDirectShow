@@ -1,9 +1,9 @@
 #include <streams.h>
 #include <strsafe.h>
-#include "ps3eye.h"
+#include "ps3eye.hpp"
 #include "PS3EyeSourceFilter.h"
 
-PS3EyePushPin::PS3EyePushPin(HRESULT *phr, CSource *pFilter, ps3eye::PS3EYECam::PS3EYERef device) :
+PS3EyePushPin::PS3EyePushPin(HRESULT *phr, CSource *pFilter, std::shared_ptr<ps3eye::camera> device) :
 	CSourceStream(NAME("PS3 Eye Source"), phr, pFilter, L"Out"),
 	_device(device)
 {
@@ -153,14 +153,15 @@ HRESULT PS3EyePushPin::OnThreadCreate()
 {
 	VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER*)m_mt.Format();
 	int fps = 10000000 / ((int)pvi->AvgTimePerFrame);
+
 	OutputDebugString(L"initing device\n");
 	if (_device.use_count() > 0) {
-		bool didInit = _device->init(pvi->bmiHeader.biWidth, pvi->bmiHeader.biHeight, fps, ps3eye::PS3EYECam::EOutputFormat::BGRA);
+		bool didInit = _device->init(ps3eye::res_VGA, fps, ps3eye::format::BGRA);
 		if (didInit) {
 			OutputDebugString(L"starting device\n");
-			_device->setFlip(false, true);
-			_device->setAutogain(true);
-			_device->setAutoWhiteBalance(true);
+			_device->set_flip_status(false, true);
+			_device->set_auto_gain(true);
+			_device->set_awb(true);
 			_device->start();
 			OutputDebugString(L"done\n");
 			return S_OK;
@@ -198,7 +199,7 @@ HRESULT PS3EyePushPin::FillBuffer(IMediaSample *pSample)
 	ASSERT(m_mt.formattype == FORMAT_VideoInfo);
 
 	if (_device.use_count() > 0) {
-		_device->getFrame(pData);
+		_device->get_frame(pData);
 	}
 	else {
 		// TODO: fill with error message image

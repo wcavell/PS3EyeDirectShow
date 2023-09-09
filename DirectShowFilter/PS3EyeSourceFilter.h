@@ -8,14 +8,14 @@ class PS3EyePushPin;
 class PS3EyePushPin : public CSourceStream, public IKsPropertySet, public IAMStreamConfig
 {
 protected:
-	ps3eye::PS3EYECam::PS3EYERef _device;
+	std::shared_ptr<ps3eye::camera> _device;
 	CMediaType _currentMediaType;
 	HRESULT _GetMediaType(int iPosition, CMediaType *pMediaType);
 	REFERENCE_TIME _startTime;
 	IReferenceClock *_refClock;
 
 public:
-	PS3EyePushPin(HRESULT *phr, CSource *pFilter, ps3eye::PS3EYECam::PS3EYERef device);
+	PS3EyePushPin(HRESULT *phr, CSource *pFilter, std::shared_ptr<ps3eye::camera> device);
 	~PS3EyePushPin();
 
 	DECLARE_IUNKNOWN

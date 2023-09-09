@@ -1,7 +1,7 @@
 #include <streams.h>
 #include <strsafe.h>
 
-#include "ps3eye.h"
+#include "ps3eye.hpp"
 #include "PS3EyeSourceFilter.h"
 #include "PS3EyeGuids.h"
 
@@ -9,8 +9,8 @@ PS3EyeSource::PS3EyeSource(IUnknown *pUnk, HRESULT *phr)
 	: CSource(NAME("PS3EyeSource"), pUnk, CLSID_PS3EyeSource),
 	_pin(NULL)
 {
-	const std::vector<ps3eye::PS3EYECam::PS3EYERef> &devices = ps3eye::PS3EYECam::getDevices(true);
-	ps3eye::PS3EYECam::PS3EYERef dev;
+	const std::vector<std::shared_ptr<ps3eye::camera>> &devices = ps3eye::list_devices();
+	std::shared_ptr<ps3eye::camera> dev;
 	if (devices.size() > 0) {
 		dev = devices[0];
 	}

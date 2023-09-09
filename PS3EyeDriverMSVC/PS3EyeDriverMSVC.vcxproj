@@ -23,7 +23,7 @@
     <ProjectGuid>{81A685B5-2A00-4C6C-98A3-7CFBEFB1D36C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PS3EyeDriverMSVC</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -117,6 +117,7 @@
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
       <AdditionalIncludeDirectories>..\libusb\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,6 +167,7 @@
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
       <AdditionalIncludeDirectories>..\libusb\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -182,12 +184,19 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\PS3EYEDriver\src\ps3eye.h" />
-    <ClInclude Include="..\PS3EYEDriver\src\ps3eye_capi.h" />
+    <ClCompile Include="..\PS3EYEDriver\accessors.cpp" />
+    <ClCompile Include="..\PS3EYEDriver\mgr.cpp" />
+    <ClCompile Include="..\PS3EYEDriver\ps3eye.cpp" />
+    <ClCompile Include="..\PS3EYEDriver\queue.cpp" />
+    <ClCompile Include="..\PS3EYEDriver\urb.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\PS3EYEDriver\src\ps3eye.cpp" />
-    <ClCompile Include="..\PS3EYEDriver\src\ps3eye_capi.cpp" />
+    <ClInclude Include="..\PS3EYEDriver\internal.hpp" />
+    <ClInclude Include="..\PS3EYEDriver\mgr.hpp" />
+    <ClInclude Include="..\PS3EYEDriver\ps3eye.hpp" />
+    <ClInclude Include="..\PS3EYEDriver\queue.hpp" />
+    <ClInclude Include="..\PS3EYEDriver\setter.hpp" />
+    <ClInclude Include="..\PS3EYEDriver\urb.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
