@@ -1792,7 +1792,6 @@ CBasePin::AttemptConnection(
         if (SUCCEEDED(hr)) {
             /* See if the other pin will accept this type */
 
-			hr = pReceivePin->QueryAccept(pmt);
             hr = pReceivePin->ReceiveConnection((IPin *)this, pmt);
             if (SUCCEEDED(hr)) {
                 /* Complete the connection */

@@ -622,7 +622,7 @@ public:
     virtual ~CEnumPins();
 
     // IUnknown
-    virtual STDMETHODIMP QueryInterface(REFIID riid, __deref_out void **ppv);
+    STDMETHODIMP QueryInterface(REFIID riid, __deref_out void **ppv);
     STDMETHODIMP_(ULONG) AddRef();
     STDMETHODIMP_(ULONG) Release();
 
