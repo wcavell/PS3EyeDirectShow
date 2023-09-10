@@ -9,9 +9,12 @@
 
 
 #include <streams.h>
-#define STRSAFE_NO_DEPRECATE
-#include <strsafe.h>
-
+#if defined(UNICODE)
+    #include <wchar.h>
+#else
+    #define STRSAFE_NO_DEPRECATE
+    #include <strsafe.h>
+#endif
 
 // --- CAMEvent -----------------------
 CAMEvent::CAMEvent(BOOL fManualReset, __inout_opt HRESULT *phr)
@@ -55,7 +58,7 @@ BOOL CAMMsgEvent::WaitMsg(DWORD dwTimeout)
     // timeout (in MS) to expire.  allow SENT messages
     // to be processed while we wait
     DWORD dwWait;
-    DWORD dwStartTime;
+    DWORD dwStartTime = 0;
 
     // set the waiting period.
     DWORD dwWaitTime = dwTimeout;
@@ -282,7 +285,7 @@ BOOL
 CMsgThread::CreateThread(
     )
 {
-    m_hSem = CreateSemaphore(NULL, 0, 0x7FFFFFFF, NULL);
+    m_hSem = CreateSemaphoreEx(NULL, 0, 0x7FFFFFFF, NULL, 0, SEMAPHORE_ALL_ACCESS);
     if (m_hSem == NULL) {
         return FALSE;
     }
@@ -359,9 +362,7 @@ CMsgThread::GetThreadMsg(__out CMsg *msg)
 void WINAPI IntToWstr(int i, __out_ecount(12) LPWSTR wstr)
 {
 #ifdef UNICODE
-    if (FAILED(StringCchPrintf(wstr, 12, L"%d", i))) {
-        wstr[0] = 0;
-    }
+    swprintf_s(wstr, 12, L"%d", i);
 #else
     TCHAR temp[12];
     if (FAILED(StringCchPrintf(temp, NUMELMS(temp), "%d", i))) {
@@ -573,11 +574,8 @@ STDAPI AMGetWideString(LPCWSTR psz, __deref_out LPWSTR *ppszReturn)
     CheckPointer(ppszReturn, E_POINTER);
     ValidateReadWritePtr(ppszReturn, sizeof(LPWSTR));
     *ppszReturn = NULL;
-    size_t nameLen;
-    HRESULT hr = StringCbLengthW(psz, 100000, &nameLen);
-    if (FAILED(hr)) {
-        return hr;
-    }
+    ASSERT(psz);
+    const size_t nameLen = wcslen(psz);
     *ppszReturn = (LPWSTR)CoTaskMemAlloc(nameLen + sizeof(WCHAR));
     if (*ppszReturn == NULL) {
        return E_OUTOFMEMORY;
@@ -600,8 +598,8 @@ DWORD WINAPI WaitDispatchingMessages(
 {
     BOOL bPeeked = FALSE;
     DWORD dwResult;
-    DWORD dwStart;
-    DWORD dwThreadPriority;
+    DWORD dwStart = 0;
+    DWORD dwThreadPriority = THREAD_PRIORITY_NORMAL;
 
     static UINT uMsgId = 0;
 
@@ -614,7 +612,7 @@ DWORD WINAPI WaitDispatchingMessages(
 
         //  Minimize the chance of actually dispatching any messages
         //  by seeing if we can lock immediately.
-        dwResult = WaitForMultipleObjects(nCount, hObjects, FALSE, 0);
+        dwResult = WaitForMultipleObjectsEx(nCount, hObjects, FALSE, 0, FALSE);
         if (dwResult < WAIT_OBJECT_0 + nCount) {
             break;
         }
@@ -727,43 +725,44 @@ the Platform SDK for more information.
 ******************************************************************************/
 MMRESULT CompatibleTimeSetEvent( UINT uDelay, UINT uResolution, __in LPTIMECALLBACK lpTimeProc, DWORD_PTR dwUser, UINT fuEvent )
 {
-    #if WINVER >= 0x0501
-    {
-        static bool fCheckedVersion = false;
-        static bool fTimeKillSynchronousFlagAvailable = false; 
+    // WARN: Stripping outdated OS version check
+    //#if WINVER >= 0x0501
+    //{
+    //    static bool fCheckedVersion = false;
+    //    static bool fTimeKillSynchronousFlagAvailable = false; 
 
-        if( !fCheckedVersion ) {
-            fTimeKillSynchronousFlagAvailable = TimeKillSynchronousFlagAvailable();
-            fCheckedVersion = true;
-        }
+    //    if( !fCheckedVersion ) {
+    //        fTimeKillSynchronousFlagAvailable = TimeKillSynchronousFlagAvailable();
+    //        fCheckedVersion = true;
+    //    }
 
-        if( fTimeKillSynchronousFlagAvailable ) {
+    //    if( fTimeKillSynchronousFlagAvailable ) {
             fuEvent = fuEvent | TIME_KILL_SYNCHRONOUS;
-        }
-    }
-    #endif // WINVER >= 0x0501
+    //    }
+    //}
+    //#endif // WINVER >= 0x0501
 
     return timeSetEvent( uDelay, uResolution, lpTimeProc, dwUser, fuEvent );
 }
 
-bool TimeKillSynchronousFlagAvailable( void )
-{
-    OSVERSIONINFO osverinfo;
-
-    osverinfo.dwOSVersionInfoSize = sizeof(osverinfo);
-
-    if( GetVersionEx( &osverinfo ) ) {
-        
-        // Windows XP's major version is 5 and its' minor version is 1.
-        // timeSetEvent() started supporting the TIME_KILL_SYNCHRONOUS flag
-        // in Windows XP.
-        if( (osverinfo.dwMajorVersion > 5) || 
-            ( (osverinfo.dwMajorVersion == 5) && (osverinfo.dwMinorVersion >= 1) ) ) {
-            return true;
-        }
-    }
-
-    return false;
-}
+//bool TimeKillSynchronousFlagAvailable( void )
+//{
+//    OSVERSIONINFO osverinfo;
+//
+//    osverinfo.dwOSVersionInfoSize = sizeof(osverinfo);
+//
+//    if( GetVersionEx( &osverinfo ) ) {
+//        
+//        // Windows XP's major version is 5 and its' minor version is 1.
+//        // timeSetEvent() started supporting the TIME_KILL_SYNCHRONOUS flag
+//        // in Windows XP.
+//        if( (osverinfo.dwMajorVersion > 5) || 
+//            ( (osverinfo.dwMajorVersion == 5) && (osverinfo.dwMinorVersion >= 1) ) ) {
+//            return true;
+//        }
+//    }
+//
+//    return false;
+//}
 
 

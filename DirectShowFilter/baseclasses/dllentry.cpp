@@ -12,15 +12,17 @@
 #include <initguid.h>
 
 #ifdef DEBUG
-#ifdef UNICODE
-#ifndef _UNICODE
-#define _UNICODE
-#endif // _UNICODE
-#endif // UNICODE
+    #ifdef UNICODE
+        #ifndef _UNICODE
+            #define _UNICODE
+        #endif // _UNICODE
+        #endif // UNICODE
+#endif // DEBUG
 
 #include <tchar.h>
-#endif // DEBUG
-#include <strsafe.h>
+#if !defined(UNICODE)
+    #include <strsafe.h>
+#endif
 
 extern CFactoryTemplate g_Templates[];
 extern int g_cTemplates;
@@ -304,19 +306,20 @@ _DllEntryPoint(
         DisableThreadLibraryCalls(hInstance);
         DbgInitialise(hInstance);
 
-    	{
-    	    // The platform identifier is used to work out whether
-    	    // full unicode support is available or not.  Hence the
-    	    // default will be the lowest common denominator - i.e. N/A
-                g_amPlatform = VER_PLATFORM_WIN32_WINDOWS; // win95 assumed in case GetVersionEx fails
-    
-                g_osInfo.dwOSVersionInfoSize = sizeof(g_osInfo);
-                if (GetVersionEx(&g_osInfo)) {
-            	g_amPlatform = g_osInfo.dwPlatformId;
-    	    } else {
-    		DbgLog((LOG_ERROR, 1, TEXT("Failed to get the OS platform, assuming Win95")));
-    	    }
-    	}
+        // NOTE: This is way out of date and just annoys compiler; just assuming VER_PLATFORM_WIN32_NT
+		//{
+		//	// The platform identifier is used to work out whether
+		//	// full unicode support is available or not.  Hence the
+		//	// default will be the lowest common denominator - i.e. N/A
+		//	g_amPlatform = VER_PLATFORM_WIN32_WINDOWS; // win95 assumed in case GetVersionEx fails
+
+		//	g_osInfo.dwOSVersionInfoSize = sizeof(g_osInfo);
+		//	if(GetVersionEx(&g_osInfo)) {
+		//		g_amPlatform = g_osInfo.dwPlatformId;
+		//	} else {
+		//		DbgLog((LOG_ERROR, 1, TEXT("Failed to get the OS platform, assuming Win95")));
+		//	}
+		//}
 
         g_hInst = hInstance;
         DllInitClasses(TRUE);
@@ -342,10 +345,10 @@ _DllEntryPoint(
                 pName++;
             }
 
-            (void)StringCchPrintf(szInfo, NUMELMS(szInfo), TEXT("Executable: %s  Pid %x  Tid %x. "),
+            _stprintf_s(szInfo, NUMELMS(szInfo), TEXT("Executable: %s  Pid %x  Tid %x. "),
 			    pName, GetCurrentProcessId(), GetCurrentThreadId());
 
-            (void)StringCchPrintf(szInfo+lstrlen(szInfo), NUMELMS(szInfo) - lstrlen(szInfo), TEXT("Module %s, %d objects left active!"),
+            _stprintf_s(szInfo+lstrlen(szInfo), NUMELMS(szInfo) - lstrlen(szInfo), TEXT("Module %s, %d objects left active!"),
                      m_ModuleName, CBaseObject::ObjectsActive());
             DbgAssert(szInfo, TEXT(__FILE__),__LINE__);
 

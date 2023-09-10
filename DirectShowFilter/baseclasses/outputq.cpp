@@ -104,7 +104,7 @@ COutputQueue::COutputQueue(
 
     if (bQueue) {
         DbgLog((LOG_TRACE, 2, TEXT("Creating thread for output pin")));
-        m_hSem = CreateSemaphore(NULL, 0, 0x7FFFFFFF, NULL);
+        m_hSem = CreateSemaphoreEx(NULL, 0, 0x7FFFFFFF, NULL, 0, SEMAPHORE_ALL_ACCESS);
         if (m_hSem == NULL) {
             DWORD dwError = GetLastError();
             *phr = AmHresultFromWin32(dwError);
@@ -205,8 +205,8 @@ DWORD COutputQueue::ThreadProc()
     while (TRUE) {
         BOOL          bWait = FALSE;
         IMediaSample *pSample;
-        LONG          lNumberToSend; // Local copy
-        NewSegmentPacket* ppacket;
+        LONG          lNumberToSend = 0; // Local copy
+        NewSegmentPacket* ppacket = nullptr;
 
         //
         //  Get a batch of samples and send it if possible
@@ -364,8 +364,10 @@ DWORD COutputQueue::ThreadProc()
         }
 
         if (pSample == NEW_SEGMENT) {
+            ASSERT(ppacket);
             m_pPin->NewSegment(ppacket->tStart, ppacket->tStop, ppacket->dRate);
             delete ppacket;
+            ppacket = nullptr;
         }
     }
 }

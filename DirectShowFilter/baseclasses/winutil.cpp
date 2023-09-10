@@ -10,7 +10,10 @@
 #include <streams.h>
 #include <limits.h>
 #include <dvdmedia.h>
-#include <strsafe.h>
+#include <tchar.h>
+#if !defined(UNICODE)
+    #include <strsafe.h>
+#endif
 #include <checkbmi.h>
 
 static UINT MsgDestroy;
@@ -454,7 +457,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,         // Window handle
 #endif
 
         LONG_PTR rc = _SetWindowLongPtr(hwnd, (DWORD) 0, pBaseWindow);
-
+        DBG_UNREFERENCED_LOCAL_VARIABLE(rc);
 
 #ifdef DEBUG
         if (0 == rc) {
@@ -556,8 +559,10 @@ HRESULT CBaseWindow::InitialiseWindow(HWND hwnd)
 
     if (m_bDoGetDC)
     {
-        EXECUTE_ASSERT(m_hdc = GetDC(hwnd));
-        EXECUTE_ASSERT(m_MemoryDC = CreateCompatibleDC(m_hdc));
+        m_hdc = GetDC(hwnd);
+        ASSERT(m_hdc);
+        m_MemoryDC = CreateCompatibleDC(m_hdc);
+        ASSERT(m_MemoryDC);
 
         EXECUTE_ASSERT(SetStretchBltMode(m_hdc,COLORONCOLOR));
         EXECUTE_ASSERT(SetStretchBltMode(m_MemoryDC,COLORONCOLOR));
@@ -964,7 +969,7 @@ void CDrawImage::DisplaySampleTimes(IMediaSample *pSample)
 
     // Format the sample time stamps
 
-    (void)StringCchPrintf(szTimes,NUMELMS(szTimes),TEXT("%08d : %08d"),
+    _stprintf_s(szTimes,NUMELMS(szTimes),TEXT("%08d : %08d"),
              m_StartSample.Millisecs(),
              m_EndSample.Millisecs());
 
@@ -998,6 +1003,7 @@ void CDrawImage::UpdateColourTable(HDC hdc,__in BITMAPINFOHEADER *pbmi)
     UINT uiReturn = SetDIBColorTable(hdc,(UINT) 0,
                                      pbmi->biClrUsed,
                                      pColourTable);
+    DBG_UNREFERENCED_LOCAL_VARIABLE(uiReturn);
 
     // Should always succeed but check in debug builds
     ASSERT(uiReturn == pbmi->biClrUsed);
@@ -2444,7 +2450,7 @@ HRESULT CImageDisplay::UpdateFormat(__inout VIDEOINFO *pVideoInfo)
 {
     ASSERT(pVideoInfo);
 
-    BITMAPINFOHEADER *pbmi = HEADER(pVideoInfo);
+    //BITMAPINFOHEADER *pbmi = HEADER(pVideoInfo);
     SetRectEmpty(&pVideoInfo->rcSource);
     SetRectEmpty(&pVideoInfo->rcTarget);
 
@@ -2676,7 +2682,7 @@ STDAPI ConvertVideoInfoToVideoInfo2(__inout AM_MEDIA_TYPE *pmt)
     if (NULL == pmt->pbFormat || pmt->cbFormat < sizeof(VIDEOINFOHEADER)) {
         return E_INVALIDARG;
     }
-    VIDEOINFO *pVideoInfo = (VIDEOINFO *)pmt->pbFormat;
+    //VIDEOINFO *pVideoInfo = (VIDEOINFO *)pmt->pbFormat;
     DWORD dwNewSize;
     HRESULT hr = DWordAdd(pmt->cbFormat, sizeof(VIDEOINFOHEADER2) - sizeof(VIDEOINFOHEADER), &dwNewSize);
     if (FAILED(hr)) {

@@ -46,21 +46,20 @@ LPSTR WINAPI StringFromResource(__out_ecount(STR_MAX_LENGTH) LPSTR pBuffer, int 
 
 LPWSTR WINAPI WideStringFromResource(__out_ecount(STR_MAX_LENGTH) LPWSTR pBuffer, int iResourceID)
 {
-    *pBuffer = 0;
+	*pBuffer = 0;
 
-    if (g_amPlatform == VER_PLATFORM_WIN32_NT) {
-	LoadStringW(g_hInst,iResourceID,pBuffer,STR_MAX_LENGTH);
-    } else {
-
-	CHAR szBuffer[STR_MAX_LENGTH];
-	DWORD dwStringLength = LoadString(g_hInst,iResourceID,szBuffer,STR_MAX_LENGTH);
-	// if we loaded a string convert it to wide characters, ensuring
-	// that we also null terminate the result.
-	if (dwStringLength++) {
-	    MultiByteToWideChar(CP_ACP,0,szBuffer,dwStringLength,pBuffer,STR_MAX_LENGTH);
-	}
-    }
-    return pBuffer;
+	//if(g_amPlatform == VER_PLATFORM_WIN32_NT) {
+		LoadStringW(g_hInst, iResourceID, pBuffer, STR_MAX_LENGTH);
+	//} else {
+	//	CHAR szBuffer[STR_MAX_LENGTH];
+	//	DWORD dwStringLength = LoadString(g_hInst, iResourceID, szBuffer, STR_MAX_LENGTH);
+	//	// if we loaded a string convert it to wide characters, ensuring
+	//	// that we also null terminate the result.
+	//	if(dwStringLength++) {
+	//		MultiByteToWideChar(CP_ACP, 0, szBuffer, dwStringLength, pBuffer, STR_MAX_LENGTH);
+	//	}
+	//}
+	return pBuffer;
 }
 
 #endif
@@ -603,7 +602,6 @@ HRESULT CLoadDirectDraw::LoadDirectDraw(__in LPSTR szDevice)
     PDRAWCREATE pDrawCreate;
     PDRAWENUM pDrawEnum;
     LPDIRECTDRAWENUMERATEEXA pDrawEnumEx;
-    HRESULT hr = NOERROR;
 
     NOTE("Entering DoLoadDirectDraw");
 
@@ -620,7 +618,7 @@ HRESULT CLoadDirectDraw::LoadDirectDraw(__in LPSTR szDevice)
     if(!m_hDirectDraw)
     {
         UINT ErrorMode = SetErrorMode(SEM_NOOPENFILEERRORBOX);
-        m_hDirectDraw = LoadLibrary(TEXT("DDRAW.DLL"));
+        m_hDirectDraw = LoadLibraryEx(TEXT("DDRAW.DLL"), NULL, 0);
         SetErrorMode(ErrorMode);
 
         if (m_hDirectDraw == NULL) {

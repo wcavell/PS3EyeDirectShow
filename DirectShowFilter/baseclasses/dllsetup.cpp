@@ -8,7 +8,10 @@
 
 
 #include <streams.h>
-#include <strsafe.h>
+#include <tchar.h>
+#if !defined(UNICODE)
+    #include <strsafe.h>
+#endif
 
 //---------------------------------------------------------------------------
 // defines
@@ -125,12 +128,13 @@ AMovieSetupRegisterServer( CLSID   clsServer
   HRESULT hr = StringFromGUID2( clsServer
                               , szCLSID
                               , CHARS_IN_GUID );
+  DBG_UNREFERENCED_LOCAL_VARIABLE(hr);
   ASSERT( SUCCEEDED(hr) );
 
   // create key
   //
   HKEY hkey;
-  (void)StringCchPrintf( achTemp, NUMELMS(achTemp), TEXT("CLSID\\%ls"), szCLSID );
+  _stprintf_s( achTemp, NUMELMS(achTemp), TEXT("CLSID\\%ls"), szCLSID );
   LONG lreturn = RegCreateKey( HKEY_CLASSES_ROOT
                              , (LPCTSTR)achTemp
                              , &hkey              );
@@ -142,7 +146,7 @@ AMovieSetupRegisterServer( CLSID   clsServer
   // set description string
   //
 
-  (void)StringCchPrintf( achTemp, NUMELMS(achTemp), TEXT("%ls"), szDescription );
+  _stprintf_s( achTemp, NUMELMS(achTemp), TEXT("%ls"), szDescription );
   lreturn = RegSetValue( hkey
                        , (LPCTSTR)NULL
                        , REG_SZ
@@ -160,7 +164,7 @@ AMovieSetupRegisterServer( CLSID   clsServer
   //
   HKEY hsubkey;
 
-  (void)StringCchPrintf( achTemp, NUMELMS(achTemp), TEXT("%ls"), szServerType );
+  _stprintf_s( achTemp, NUMELMS(achTemp), TEXT("%ls"), szServerType );
   lreturn = RegCreateKey( hkey
                         , achTemp
                         , &hsubkey     );
@@ -172,7 +176,7 @@ AMovieSetupRegisterServer( CLSID   clsServer
 
   // set Server string
   //
-  (void)StringCchPrintf( achTemp, NUMELMS(achTemp), TEXT("%ls"), szFileName );
+  _stprintf_s( achTemp, NUMELMS(achTemp), TEXT("%ls"), szFileName );
   lreturn = RegSetValue( hsubkey
                        , (LPCTSTR)NULL
                        , REG_SZ
@@ -185,7 +189,7 @@ AMovieSetupRegisterServer( CLSID   clsServer
     return AmHresultFromWin32(lreturn);
   }
 
-  (void)StringCchPrintf( achTemp, NUMELMS(achTemp), TEXT("%ls"), szThreadingModel );
+  _stprintf_s( achTemp, NUMELMS(achTemp), TEXT("%ls"), szThreadingModel );
   lreturn = RegSetValueEx( hsubkey
                          , TEXT("ThreadingModel")
                          , 0L
@@ -228,7 +232,7 @@ AMovieSetupUnregisterServer( CLSID clsServer )
   ASSERT( SUCCEEDED(hr) );
 
   TCHAR achBuffer[MAX_KEY_LEN];
-  (void)StringCchPrintf( achBuffer, NUMELMS(achBuffer), TEXT("CLSID\\%ls"), szCLSID );
+  _stprintf_s( achBuffer, NUMELMS(achBuffer), TEXT("CLSID\\%ls"), szCLSID );
 
   // delete subkey
   //
