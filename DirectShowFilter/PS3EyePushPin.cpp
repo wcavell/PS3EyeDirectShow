@@ -156,7 +156,7 @@ HRESULT PS3EyePushPin::OnThreadCreate()
 
 	OutputDebugString(L"initing device\n");
 	if (_device.use_count() > 0) {
-		bool didInit = _device->init(ps3eye::res_VGA, fps, ps3eye::format::BGRA);
+		bool didInit = _device->init(ps3eye::res_VGA, fps, ps3eye::format::BGR);
 		if (didInit) {
 			OutputDebugString(L"starting device\n");
 			_device->set_flip_status(false, true);
