@@ -153,10 +153,19 @@ HRESULT PS3EyePushPin::OnThreadCreate()
 {
 	VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER*)m_mt.Format();
 	int fps = 10000000 / ((int)pvi->AvgTimePerFrame);
+	ps3eye::resolution res;
+
+	if ((pvi->bmiHeader.biWidth == 0 && pvi->bmiHeader.biHeight == 0)
+		|| pvi->bmiHeader.biWidth > 320 || pvi->bmiHeader.biHeight > 240) {
+		res = ps3eye::res_VGA;
+	}
+	else {
+		res = ps3eye::res_QVGA;
+	}
 
 	OutputDebugString(L"initing device\n");
 	if (_device.use_count() > 0) {
-		bool didInit = _device->init(ps3eye::res_VGA, fps, ps3eye::format::BGR);
+		bool didInit = _device->init(res, 60, ps3eye::format::BGRA);
 		if (didInit) {
 			OutputDebugString(L"starting device\n");
 			_device->set_flip_status(false, true);
@@ -199,6 +208,14 @@ HRESULT PS3EyePushPin::FillBuffer(IMediaSample *pSample)
 	ASSERT(m_mt.formattype == FORMAT_VideoInfo);
 
 	if (_device.use_count() > 0) {
+		/*
+		char msgbuf[64];
+		wchar_t wmsgbuf[64];
+		size_t outSize;
+		snprintf(msgbuf, 64, "cbData: %lu\n", cbData);
+		mbstowcs_s(&outSize, wmsgbuf, strlen(msgbuf) + 1, msgbuf, strlen(msgbuf));
+		OutputDebugString(wmsgbuf);
+		*/
 		_device->get_frame(pData);
 	}
 	else {
