@@ -251,23 +251,22 @@ HRESULT __stdcall PS3EyePushPin::Set(REFGUID guidPropSet, DWORD dwPropID, LPVOID
 
 HRESULT __stdcall PS3EyePushPin::Get(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData, DWORD * pcbReturned)
 {
-	if (guidPropSet == AMPROPSETID_Pin) {
-		if (dwPropID == AMPROPERTY_PIN_CATEGORY) {
-			if (cbPropData >= sizeof(GUID)) {
-				*((GUID *)pPropData) = PIN_CATEGORY_CAPTURE;
-				return S_OK;
-			}
-			else {
-				return E_POINTER;
-			}
-		}
-		else {
-			return E_PROP_ID_UNSUPPORTED;
-		}
-	}
-	else {
+	if (guidPropSet != AMPROPSETID_Pin)
 		return E_PROP_SET_UNSUPPORTED;
-	}
+	if (dwPropID != AMPROPERTY_PIN_CATEGORY)
+		return E_PROP_ID_UNSUPPORTED;
+	if (pPropData == NULL && pcbReturned == NULL)
+		return E_POINTER;
+
+	if (pcbReturned)
+		*pcbReturned = sizeof(GUID);
+	if (pPropData == NULL)
+		return S_OK;
+	if (cbPropData < sizeof(GUID))
+		return E_UNEXPECTED;
+
+	*(GUID *)pPropData = PIN_CATEGORY_CAPTURE;
+	return S_OK;
 }
 
 HRESULT __stdcall PS3EyePushPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD * pTypeSupport)
