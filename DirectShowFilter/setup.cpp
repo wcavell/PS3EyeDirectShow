@@ -27,7 +27,7 @@
 const AMOVIESETUP_MEDIATYPE sudOpPinTypes =
 {
 	&MEDIATYPE_Video,       // Major type
-	&MEDIASUBTYPE_RGB32      // Minor type
+	&MEDIASUBTYPE_RGB24      // Minor type
 };
 
 const AMOVIESETUP_PIN sudOutputPinPS3Eye =

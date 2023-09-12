@@ -27,13 +27,13 @@ HRESULT PS3EyePushPin::CheckMediaType(const CMediaType *pMediaType)
 	CheckPointer(pMediaType, E_POINTER);
 
 	if (pMediaType->IsValid() && *pMediaType->Type() == MEDIATYPE_Video &&
-		pMediaType->Subtype() != NULL && *pMediaType->Subtype() == MEDIASUBTYPE_RGB32) {
+		pMediaType->Subtype() != NULL && *pMediaType->Subtype() == MEDIASUBTYPE_RGB24) {
 		if (*pMediaType->FormatType() == FORMAT_VideoInfo &&
 			pMediaType->Format() != NULL && pMediaType->FormatLength() > 0) {
 			VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER*)pMediaType->Format();
 			if ((pvi->bmiHeader.biWidth == 640 && pvi->bmiHeader.biHeight == 480) ||
 				(pvi->bmiHeader.biWidth == 320 && pvi->bmiHeader.biHeight == 240)) {
-				if (pvi->bmiHeader.biBitCount == 32 && pvi->bmiHeader.biCompression == BI_RGB
+				if (pvi->bmiHeader.biBitCount == 24 && pvi->bmiHeader.biCompression == BI_RGB
 					&& pvi->bmiHeader.biPlanes == 1) {
 					int minTime = 10000000 / 70;
 					int maxTime = 10000000 / 2;
@@ -86,14 +86,16 @@ HRESULT PS3EyePushPin::_GetMediaType(int iPosition, CMediaType *pMediaType) {
 		fps = iPosition == 5 ? 15 : 30 * (iPosition-2);
 	}
 
-	pvi->AvgTimePerFrame = 10000000 / fps;
+	uint64_t rate = (uint64_t)GetBitmapSize(&pvi->bmiHeader) * fps * 2;
 
-	pvi->bmiHeader.biBitCount = 32;
+	pvi->AvgTimePerFrame = 10000000 / fps;
+	pvi->bmiHeader.biBitCount = 24;
 	pvi->bmiHeader.biCompression = BI_RGB;
 	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pvi->bmiHeader.biPlanes = 1;
 	pvi->bmiHeader.biSizeImage = GetBitmapSize(&pvi->bmiHeader);
 	pvi->bmiHeader.biClrImportant = 0;
+	pvi->dwBitRate = (DWORD)rate;
 
 	SetRectEmpty(&(pvi->rcSource)); // we want the whole image area rendered.
 	SetRectEmpty(&(pvi->rcTarget)); // no particular destination rectangle
@@ -165,7 +167,7 @@ HRESULT PS3EyePushPin::OnThreadCreate()
 
 	OutputDebugString(L"initing device\n");
 	if (_device.use_count() > 0) {
-		bool didInit = _device->init(res, 60, ps3eye::format::BGRA);
+		bool didInit = _device->init(res, fps, ps3eye::format::BGR);
 		if (didInit) {
 			OutputDebugString(L"starting device\n");
 			_device->set_flip_status(false, true);
@@ -369,25 +371,21 @@ HRESULT __stdcall PS3EyePushPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE ** ppmt
 		VIDEO_STREAM_CONFIG_CAPS *cc = (VIDEO_STREAM_CONFIG_CAPS *)pSCC;
 		cc->guid = MEDIATYPE_Video;
 		cc->VideoStandard = 0;
+		cc->MinFrameInterval = 10000000 / 70;
+		cc->MaxFrameInterval = 10000000 / 2;
+		cc->MinOutputSize = inputSize;
+		cc->MaxOutputSize = inputSize;
 		cc->InputSize = inputSize;
 		cc->MinCroppingSize = inputSize;
 		cc->MaxCroppingSize = inputSize;
-		cc->CropGranularityX = 4;
-		cc->CropGranularityY = 4;
-		cc->CropAlignX = 4;
-		cc->CropAlignY = 4;
-		cc->MinOutputSize = inputSize;
-		cc->MaxOutputSize = inputSize;
-		cc->OutputGranularityX = 4;
-		cc->OutputGranularityY = 4;
+		cc->CropGranularityX = pvi->bmiHeader.biWidth;
+		cc->CropGranularityY = pvi->bmiHeader.biHeight;
 		cc->StretchTapsX = 0;
 		cc->StretchTapsY = 0;
 		cc->ShrinkTapsX = 0;
 		cc->ShrinkTapsY = 0;
-		cc->MinFrameInterval = 10000000 / 60;
-		cc->MaxFrameInterval = 10000000 / 2;
-		cc->MinBitsPerSecond = 0;
-		cc->MaxBitsPerSecond = (LONG)1000000000000;
+		cc->MinBitsPerSecond = pvi->dwBitRate;
+		cc->MaxBitsPerSecond = cc->MinBitsPerSecond;
 	}
 	return hr;
 }
