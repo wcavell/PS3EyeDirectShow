@@ -1,6 +1,6 @@
 [submodule "PS3EYEDriver"]
 	path = PS3EYEDriver
-url=https://github.com/opentrack/PS3EYEDriver.git
+	url=https://github.com/AllanCat/PS3EYEDriver.git
 [submodule "libusb"]
 	path = libusb
 	url = https://github.com/libusb/libusb.git
