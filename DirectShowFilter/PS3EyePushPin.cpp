@@ -62,7 +62,7 @@ HRESULT PS3EyePushPin::GetMediaType(int iPosition, CMediaType *pMediaType) {
 }
 
 HRESULT PS3EyePushPin::_GetMediaType(int iPosition, CMediaType *pMediaType) {
-	if (iPosition < 0 || iPosition >= 6) return E_UNEXPECTED;
+	if (iPosition < 0 || iPosition >= 10) return E_UNEXPECTED;
 	CheckPointer(pMediaType, E_POINTER);
 
 	VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER*)pMediaType->AllocFormatBuffer(sizeof(VIDEOINFOHEADER));
@@ -70,21 +70,21 @@ HRESULT PS3EyePushPin::_GetMediaType(int iPosition, CMediaType *pMediaType) {
 		return(E_OUTOFMEMORY);
 	ZeroMemory(pvi, pMediaType->cbFormat);
 
+	const int fpsList[10] = {60, 50, 40, 30, 15,  // 640x480
+							 60, 50, 40, 37, 30}; // 320x240
 
 	int fps = 10;
-	if (iPosition / 3 == 0) {
-		// 640x480, {30, 60, 15} fps
+	if (iPosition < 5) {
+		// 640x480
 		pvi->bmiHeader.biWidth = 640;
 		pvi->bmiHeader.biHeight = 480;
-		fps = iPosition == 2 ? 15 : 30 * (iPosition+1);
 	}
 	else  {
-		// 320x240, {30, 60, 15} fps
+		// 320x240
 		pvi->bmiHeader.biWidth = 320;
 		pvi->bmiHeader.biHeight = 240;
-
-		fps = iPosition == 5 ? 15 : 30 * (iPosition-2);
 	}
+	fps = fpsList[iPosition];
 
 	uint64_t rate = (uint64_t)GetBitmapSize(&pvi->bmiHeader) * fps * 2;
 
@@ -352,7 +352,7 @@ HRESULT __stdcall PS3EyePushPin::GetNumberOfCapabilities(int * piCount, int * pi
 {
 	CheckPointer(piCount, E_POINTER);
 	CheckPointer(piSize, E_POINTER);
-	*piCount = 6;
+	*piCount = 10;
 	*piSize = sizeof(VIDEO_STREAM_CONFIG_CAPS);
 	return S_OK;
 }
