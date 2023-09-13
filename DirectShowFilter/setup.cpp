@@ -22,6 +22,7 @@
 // intelligent connect. Instead, use the CLSID to create the filter or just 
 // use 'new' in your application.
 
+#define MAX_DEVICE_COUNT 8
 
 // Filter setup data
 const AMOVIESETUP_MEDIATYPE sudOpPinTypes =
@@ -54,18 +55,65 @@ const AMOVIESETUP_FILTER sudPushSourcePS3Eye =
 };
 */
 
-
-
-CFactoryTemplate g_Templates[1] =
+CFactoryTemplate g_Templates[MAX_DEVICE_COUNT] =
 {
 	{
 	  g_ps3PS3EyeSource,                // Name
 	  &CLSID_PS3EyeSource,              // CLSID
 	  PS3EyeSource::CreateInstance,     // Method to create an instance of MyComponent
 	  NULL,                             // Initialization function
-	  //&sudPushSourcePS3Eye,           // Set-up information (for filters)
-	  NULL
+	  NULL                              // Set-up information (for filters)
+      //&sudPushSourcePS3Eye,           // Set-up information (for filters)
 	},
+	{
+	  g_ps3PS3EyeSource2,               // Name
+	  &CLSID_PS3EyeSource2,             // CLSID
+	  PS3EyeSource::CreateInstance2,    // Method to create an instance of MyComponent
+	  NULL,                             // Initialization function
+	  NULL                              // Set-up information (for filters)
+	},
+	{
+	  g_ps3PS3EyeSource3,               // Name
+	  &CLSID_PS3EyeSource3,             // CLSID
+	  PS3EyeSource::CreateInstance3,    // Method to create an instance of MyComponent
+	  NULL,                             // Initialization function
+	  NULL                              // Set-up information (for filters)
+	},
+	{
+	  g_ps3PS3EyeSource4,               // Name
+	  &CLSID_PS3EyeSource4,             // CLSID
+	  PS3EyeSource::CreateInstance4,    // Method to create an instance of MyComponent
+	  NULL,                             // Initialization function
+	  NULL                              // Set-up information (for filters)
+	},
+	{
+	  g_ps3PS3EyeSource5,               // Name
+	  &CLSID_PS3EyeSource5,             // CLSID
+	  PS3EyeSource::CreateInstance5,    // Method to create an instance of MyComponent
+	  NULL,                             // Initialization function
+	  NULL                              // Set-up information (for filters)
+	},
+	{
+	  g_ps3PS3EyeSource6,               // Name
+	  &CLSID_PS3EyeSource6,             // CLSID
+	  PS3EyeSource::CreateInstance6,    // Method to create an instance of MyComponent
+	  NULL,                             // Initialization function
+	  NULL                              // Set-up information (for filters)
+	},
+	{
+	  g_ps3PS3EyeSource7,               // Name
+	  &CLSID_PS3EyeSource7,             // CLSID
+	  PS3EyeSource::CreateInstance7,    // Method to create an instance of MyComponent
+	  NULL,                             // Initialization function
+	  NULL                              // Set-up information (for filters)
+	},
+	{
+	  g_ps3PS3EyeSource8,               // Name
+	  &CLSID_PS3EyeSource8,             // CLSID
+	  PS3EyeSource::CreateInstance8,    // Method to create an instance of MyComponent
+	  NULL,                             // Initialization function
+	  NULL                              // Set-up information (for filters)
+	}
 };
 
 int g_cTemplates = sizeof(g_Templates) / sizeof(g_Templates[0]);
@@ -97,59 +145,92 @@ const REGFILTER2 sudPushSourcePS3Eye = {
 //
 ////////////////////////////////////////////////////////////////////////
 
-STDAPI DllRegisterServer()
+STDAPI RegisterFilters(BOOL bRegister, int filterCount)
 {
 	HRESULT hr;
 	IFilterMapper2 *pFM2 = NULL;
+	if (bRegister)
+	{
+		hr = AMovieDllRegisterServer2(TRUE);
+		if (FAILED(hr))
+			return hr;
 
-	hr = AMovieDllRegisterServer2(TRUE);
-	if (FAILED(hr))
-		return hr;
+		hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER,
+			IID_IFilterMapper2, (void **)&pFM2);
 
-	hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER,
-		IID_IFilterMapper2, (void **)&pFM2);
+		if (FAILED(hr))
+			return hr;
 
-	if (FAILED(hr))
-		return hr;
+		REGFILTER2 sudPushSourcePS3Eye;
+		sudPushSourcePS3Eye.dwVersion = 2;
+		sudPushSourcePS3Eye.dwMerit = MERIT_NORMAL;
+		sudPushSourcePS3Eye.cPins2 = 1;
+		sudPushSourcePS3Eye.rgPins2 = &sudOutputPinPS3Eye2;
 
-	REGFILTER2 sudPushSourcePS3Eye;
-	sudPushSourcePS3Eye.dwVersion = 2;
-	sudPushSourcePS3Eye.dwMerit = MERIT_NORMAL;
-	sudPushSourcePS3Eye.cPins2 = 1;
-	sudPushSourcePS3Eye.rgPins2 = &sudOutputPinPS3Eye2;
+		for (int i = 0; i < filterCount; i++)
+		{
+			hr = pFM2->RegisterFilter(
+				*(g_Templates[i].m_ClsID),           // Filter CLSID. 
+				g_Templates[i].m_Name,               // Filter name.
+				NULL,								 // Device moniker. 
+				&CLSID_VideoInputDeviceCategory,     // Input device category.
+				g_Templates[i].m_Name,               // Instance data.
+				&sudPushSourcePS3Eye                 // Pointer to filter information.
+			);
+		}
+	}
+	else
+	{
+		hr = AMovieDllRegisterServer2(FALSE);
+		if (FAILED(hr))
+			return hr;
 
-	hr = pFM2->RegisterFilter(
-		CLSID_PS3EyeSource,                // Filter CLSID. 
-		g_ps3PS3EyeSource,                       // Filter name.
-		NULL,								// Device moniker. 
-		&CLSID_VideoInputDeviceCategory,  // Input device category.
-		g_ps3PS3EyeSource,                       // Instance data.
-		&sudPushSourcePS3Eye                    // Pointer to filter information.
-	);
+		hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER,
+			IID_IFilterMapper2, (void **)&pFM2);
+
+		if (FAILED(hr))
+			return hr;
+
+		for (int i = 0; i < filterCount; i++)
+		{
+			hr = pFM2->UnregisterFilter(&CLSID_VideoInputDeviceCategory, g_Templates[i].m_Name, *(g_Templates[i].m_ClsID));
+		}
+	}
 
 	pFM2->Release();
 	return hr;
 }
 
+STDAPI DllRegisterServer()
+{
+	return RegisterFilters(TRUE, 1);
+}
+
 STDAPI DllUnregisterServer()
 {
-	HRESULT hr;
-	IFilterMapper2 *pFM2 = NULL;
+	return RegisterFilters(FALSE, MAX_DEVICE_COUNT);
+}
 
-	hr = AMovieDllRegisterServer2(FALSE);
-	if (FAILED(hr))
-		return hr;
-
-	hr = CoCreateInstance(CLSID_FilterMapper2, NULL, CLSCTX_INPROC_SERVER,
-		IID_IFilterMapper2, (void **)&pFM2);
-
-	if (FAILED(hr))
-		return hr;
-
-	hr = pFM2->UnregisterFilter(&CLSID_VideoInputDeviceCategory, g_ps3PS3EyeSource, CLSID_PS3EyeSource);
-
-	pFM2->Release();
-	return hr;
+STDAPI DllInstall(BOOL bInstall, _In_opt_ LPCWSTR pszCmdLine)
+{
+	if (!bInstall)
+		return RegisterFilters(FALSE, MAX_DEVICE_COUNT);
+	else if (lstrcmpW(pszCmdLine, L"1") == 0)
+		return RegisterFilters(TRUE, 1);
+	else if (lstrcmpW(pszCmdLine, L"2") == 0)
+		return RegisterFilters(TRUE, 2);
+	else if (lstrcmpW(pszCmdLine, L"3") == 0)
+		return RegisterFilters(TRUE, 3);
+	else if (lstrcmpW(pszCmdLine, L"4") == 0)
+		return RegisterFilters(TRUE, 4);
+	else if (lstrcmpW(pszCmdLine, L"5") == 0)
+		return RegisterFilters(TRUE, 5);
+	else if (lstrcmpW(pszCmdLine, L"6") == 0)
+		return RegisterFilters(TRUE, 6);
+	else if (lstrcmpW(pszCmdLine, L"7") == 0)
+		return RegisterFilters(TRUE, 7);
+	else
+		return RegisterFilters(TRUE, MAX_DEVICE_COUNT);
 }
 
 //

@@ -2,6 +2,13 @@
 
 // Filter name strings
 #define g_ps3PS3EyeSource    L"PS3 Eye Universal"
+#define g_ps3PS3EyeSource2    L"PS3 Eye Universal2"
+#define g_ps3PS3EyeSource3    L"PS3 Eye Universal3"
+#define g_ps3PS3EyeSource4    L"PS3 Eye Universal4"
+#define g_ps3PS3EyeSource5    L"PS3 Eye Universal5"
+#define g_ps3PS3EyeSource6    L"PS3 Eye Universal6"
+#define g_ps3PS3EyeSource7    L"PS3 Eye Universal7"
+#define g_ps3PS3EyeSource8    L"PS3 Eye Universal8"
 
 class PS3EyePushPin;
 
@@ -74,11 +81,19 @@ public:
 class PS3EyeSource : public CSource
 {
 private:
-	PS3EyeSource(IUnknown *pUnk, HRESULT *phr);
+	PS3EyeSource(IUnknown *pUnk, HRESULT *phr, const GUID id, int index);
 	~PS3EyeSource();
 
 	PS3EyePushPin *_pin;
 
 public:
+	// Support up to 8 devices
 	static CUnknown * WINAPI CreateInstance(IUnknown *pUnk, HRESULT *phr);
+	static CUnknown * WINAPI CreateInstance2(IUnknown *pUnk, HRESULT *phr);
+	static CUnknown * WINAPI CreateInstance3(IUnknown *pUnk, HRESULT *phr);
+	static CUnknown * WINAPI CreateInstance4(IUnknown *pUnk, HRESULT *phr);
+	static CUnknown * WINAPI CreateInstance5(IUnknown *pUnk, HRESULT *phr);
+	static CUnknown * WINAPI CreateInstance6(IUnknown *pUnk, HRESULT *phr);
+	static CUnknown * WINAPI CreateInstance7(IUnknown *pUnk, HRESULT *phr);
+	static CUnknown * WINAPI CreateInstance8(IUnknown *pUnk, HRESULT *phr);
 };
