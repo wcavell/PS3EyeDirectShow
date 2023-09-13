@@ -32,7 +32,15 @@ regsvr32 /n /i:"2" "C:\Program Files\PS3 Eye Universal Driver\PS3EyeSourceFilter
 
 ## TODO
 - Microphone support?
-  
+
+## Reference
+- Modern version of [DirectShow baseclasses](https://github.com/roman380/Windows-classic-samples/tree/directshow/Samples/Win7Samples/multimedia/directshow) by Ronan
+- [PS3EYEDriver](https://github.com/opentrack/PS3EYEDriver) by Opentrack
+- [obs-studio](https://github.com/obsproject/obs-studio) mainly the plugins/win-dshow section.
+- [obs-virtual-cam](https://github.com/CatxFish/obs-virtual-cam/)
+- [DirectShowで仮想カメラを自作しよう](https://qiita.com/HexagramNM/items/2311f025f3af758c83a0) for addressing the BGRA format issue.
+
+
 If you enjoy this fork, feel free to buy me a [kofi](https://ko-fi.com/allancat) :3
 
 Below is the original readme (outdated)
