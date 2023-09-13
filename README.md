@@ -17,7 +17,7 @@
 
 ## Installation
 1. Following the driver installation tutorial [here](https://github.com/opentrack/opentrack/wiki/PS3-Eye-open-driver-instructions) provided by Opentrack.
-2. Head to the [releases section](https://github.com/jkevin/PS3EyeDirectShow/releases) and download the installer. It will install both x86 and x64 DirectShow filters.
+2. Head to the [releases section](https://github.com/AllanCat/PS3EyeDirectShow/releases) and download the installer. It will install both x86 and x64 DirectShow filters.
 3. After installed you should be able to see "PS3 Eye Universal" appears on applications that supports DirectShow.
 4. Profit.
 5. For multiple camera devices, you can run C:\Program Files\PS3 Eye Universal Driver\ChangeCameraNumber.bat as adminAdministrator to change device number. Or you can run the following commands as administrator:
