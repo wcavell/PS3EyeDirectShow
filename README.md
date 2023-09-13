@@ -1,21 +1,27 @@
-# This fork is aiming to: 
+## This fork is aiming to: 
 1. Fix various issues on original repo.
 2. Update the latest drivers and libraries.
 3. Add more features to make PS3Eye more user friendly under Windows 10 environment.
    
-# Right now it provides the following features:
+## Right now it provides the following features:
 - Totally get rid of CLEye and use libusb-win32 driver as base instead.
   - No more janky setup.
   - Compatible with other applications such as [Opentrack](https://github.com/opentrack/opentrack) and [PSMoveService](https://github.com/psmoveservice/PSMoveService).
-  - You can follow driver installation tutorial [here](https://github.com/opentrack/opentrack/wiki/PS3-Eye-open-driver-instructions).
 - Updated PS3Eye driver to using latest version provided by opentrack
   - Alongside with previous modifications like BGRA/RGBA support and vertical flip fix.
 - Updated Libusb to latest version.
-- Fix the DirectShow issue with Chrome, Discord, etc.
+- Fixed the DirectShow issue with Chrome, Discord, etc.
   - It finally shows on your web browser and Discord yay!
 - Multiple camera devices support (up to 8 devices).
-  - Default install setups one device only, you can run C:\Program Files\PS3 Eye Universal Driver\ChangeCameraNumber.bat as adminAdministrator to change device number.
-  - Or you can run the following commands as administrator:
+  - Default install setups one device only. See below section to configure device numbers.
+
+## Installation
+1. Following the driver installation tutorial [here](https://github.com/opentrack/opentrack/wiki/PS3-Eye-open-driver-instructions) provided by Opentrack.
+2. Head to the [releases section](https://github.com/jkevin/PS3EyeDirectShow/releases) and download the installer. It will install both x86 and x64 DirectShow filters.
+3. After installed you should be able to see "PS3 Eye Universal" appears on applications that supports DirectShow.
+4. Profit.
+5. For multiple camera devices, you can run C:\Program Files\PS3 Eye Universal Driver\ChangeCameraNumber.bat as adminAdministrator to change device number. Or you can run the following commands as administrator:
+
 ## Unregister then register 2 PS3Eye cameras (up to 8)
 ```
 regsvr32 /u "C:\Program Files (x86)\PS3 Eye Universal Driver\PS3EyeSourceFilter.dll"
@@ -24,6 +30,12 @@ regsvr32 /n /i:"2" "C:\Program Files (x86)\PS3 Eye Universal Driver\PS3EyeSource
 regsvr32 /n /i:"2" "C:\Program Files\PS3 Eye Universal Driver\PS3EyeSourceFilter64.dll"
 ```
 
+## TODO
+- Microphone support?
+  
+If you enjoy this fork, feel free to buy me a [kofi](https://ko-fi.com/allancat) :3
+
+Below is the original readme (outdated)
 
 # PS3EyeDirectShow
 Windows DirectShow source filter for the PS3 Eye Camera via WinUSB (32 / 64 bit)
@@ -77,4 +89,3 @@ To build the installer, first build the 32 and 64 bit release configurations of 
 ## TODO
 - Manual exposure and white balance controls
 - Windows Media Foundation source?
-- Microphone support?
