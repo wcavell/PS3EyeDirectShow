@@ -27,9 +27,7 @@
         <Directory Id="INSTALLFOLDER" Name="PS3 Eye Universal Driver" />
       </Directory>
       <Directory Id="ProgramFiles64Folder">
-        <Directory Id="INSTALLFOLDER2" Name="PS3 Eye Universal Driver">
-          <Directory Id="DRIVERINSTALLFOLDER" Name="amd64" />
-        </Directory>
+        <Directory Id="INSTALLFOLDER2" Name="PS3 Eye Universal Driver" />
       </Directory>
     </Directory>
   </Fragment>
@@ -37,6 +35,7 @@
   <Fragment>
     <ComponentGroup Id="Filter64Components" Directory="INSTALLFOLDER2">
       <ComponentRef Id="Filter64Component" />
+      <ComponentRef Id="HelperScript" />
     </ComponentGroup>
     <ComponentGroup Id="Filter32Components" Directory="INSTALLFOLDER">
       <ComponentRef Id="Filter32Component" />
@@ -51,6 +50,9 @@
         <RegistryValue Root="HKCR" Key="CLSID\{860BB310-5D01-11D0-BD3B-00A0C911CE86}\Instance\PS3 Eye Universal" Name="CLSID" Value="{B9ACDAE7-CEE5-4394-B10D-38EDB00CDB54}" Type="string" Action="write" />
         <RegistryValue Root="HKCR" Key="CLSID\{860BB310-5D01-11D0-BD3B-00A0C911CE86}\Instance\PS3 Eye Universal" Name="FilterData" Value="020000000000600001000000000000003070693308000000010000000100000000000000380000003074793300000000480000005800000081426CFB5303D111905F0000C0CC16BA7669647300001000800000AA00389B717EEB36E44F52CE119F530020AF0BA770" Type="binary" Action="write" />
         <RegistryValue Root="HKLM" Key="Software\Microsoft\Cryptography\DRM_RNG" Value="" Type="string" Action="write" />
+      </Component>
+      <Component Id="HelperScript" Win64="yes">
+        <File Id="ChangeCameraNumber.bat" Source="$(var.ProjectDir)/ChangeCameraNumber.bat" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="INSTALLFOLDER">
