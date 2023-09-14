@@ -151,3 +151,199 @@ CUnknown * WINAPI PS3EyeSource::CreateInstance8(IUnknown * pUnk, HRESULT * phr)
 
 	return pNewFilter;
 }
+
+HRESULT __stdcall PS3EyeSource::GetPages(CAUUID *pPages)
+{
+	CheckPointer(pPages, E_POINTER);
+
+	pPages->cElems = 1;
+	pPages->pElems = (GUID*)CoTaskMemAlloc(sizeof(GUID));
+	CheckPointer(pPages->pElems, E_OUTOFMEMORY);
+	pPages->pElems[0] = CLSID_VideoProcAmpPropertyPage;
+
+	return S_OK;
+}
+
+HRESULT __stdcall PS3EyeSource::GetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags)
+{
+	CheckPointer(pMin, E_POINTER);
+	CheckPointer(pMax, E_POINTER);
+	CheckPointer(pSteppingDelta, E_POINTER);
+	CheckPointer(pDefault, E_POINTER);
+	CheckPointer(pCapsFlags, E_POINTER);
+
+	HRESULT hr = S_OK;
+	switch (Property)
+	{
+	case VideoProcAmpProperty::VideoProcAmp_Brightness:
+		*pMin = 0;
+		*pMax = 255;
+		*pSteppingDelta = 1;
+		*pDefault = 20;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Contrast:
+		*pMin = 0;
+		*pMax = 255;
+		*pSteppingDelta = 1;
+		*pDefault = 0;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Hue:
+		*pMin = 0;
+		*pMax = 128;
+		*pSteppingDelta = 1;
+		*pDefault = 64;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Saturation:
+		*pMin = 0;
+		*pMax = 255;
+		*pSteppingDelta = 1;
+		*pDefault = 0;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Sharpness:
+		*pMin = 0;
+		*pMax = 63;
+		*pSteppingDelta = 1;
+		*pDefault = 0;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_WhiteBalance:
+		*pMin = 0;
+		*pMax = 255;
+		*pSteppingDelta = 1;
+		*pDefault = 128;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Auto;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Gain:
+		*pMin = 0;
+		*pMax = 63;
+		*pSteppingDelta = 1;
+		*pDefault = 20;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Auto;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Gamma:
+	case VideoProcAmpProperty::VideoProcAmp_BacklightCompensation:
+	case VideoProcAmpProperty::VideoProcAmp_ColorEnable:
+	default:
+		hr = E_PROP_ID_UNSUPPORTED;
+		break;
+	}
+	return hr;
+}
+
+HRESULT __stdcall PS3EyeSource::Set(long Property, long lValue, long Flags)
+{
+	HRESULT hr = S_OK;
+	switch (Property)
+	{
+	case VideoProcAmpProperty::VideoProcAmp_Brightness:
+		_pin->GetDevice()->set_brightness((int)lValue);
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Contrast:
+		_pin->GetDevice()->set_contrast((int)lValue);
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Hue:
+		_pin->GetDevice()->set_hue((int)lValue);
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Saturation:
+		_pin->GetDevice()->set_saturation((int)lValue);
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Sharpness:
+		_pin->GetDevice()->set_sharpness((int)lValue);
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_WhiteBalance:
+		if (Flags == VideoProcAmpFlags::VideoProcAmp_Flags_Auto)
+		{
+			_pin->GetDevice()->set_awb(TRUE);
+		}
+		else
+		{
+			_pin->GetDevice()->set_red_balance(lValue);
+			_pin->GetDevice()->set_green_balance(lValue);
+			_pin->GetDevice()->set_blue_balance(lValue);
+			_pin->GetDevice()->set_awb(FALSE);
+		}
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Gain:
+		if (Flags == VideoProcAmpFlags::VideoProcAmp_Flags_Auto)
+		{
+			_pin->GetDevice()->set_auto_gain(TRUE);
+		}
+		else
+		{
+			_pin->GetDevice()->set_gain(lValue);
+			_pin->GetDevice()->set_auto_gain(FALSE);
+		}
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Gamma:
+	case VideoProcAmpProperty::VideoProcAmp_BacklightCompensation:
+	case VideoProcAmpProperty::VideoProcAmp_ColorEnable:
+	default:
+		hr = E_PROP_ID_UNSUPPORTED;
+		break;
+	}
+	return hr;
+}
+
+HRESULT __stdcall PS3EyeSource::Get(long Property, long *lValue, long *Flags)
+{
+	CheckPointer(lValue, E_POINTER);
+	CheckPointer(Flags, E_POINTER);
+
+	HRESULT hr = S_OK;
+	switch (Property)
+	{
+	case VideoProcAmpProperty::VideoProcAmp_Brightness:
+		*lValue = _pin->GetDevice()->brightness();
+		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Contrast:
+		*lValue = _pin->GetDevice()->contrast();
+		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Hue:
+		*lValue = _pin->GetDevice()->hue();
+		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Saturation:
+		*lValue = _pin->GetDevice()->saturation();
+		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Sharpness:
+		*lValue = _pin->GetDevice()->sharpness();
+		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_WhiteBalance:
+		*lValue = _pin->GetDevice()->red_balance();
+		if (_pin->GetDevice()->awb())
+		{
+			*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Auto;
+		}
+		else
+		{
+			*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		}
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Gain:
+		*lValue = _pin->GetDevice()->gain();
+		if (_pin->GetDevice()->auto_gain())
+		{
+			*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Auto;
+		}
+		else
+		{
+			*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		}
+		break;
+	case VideoProcAmpProperty::VideoProcAmp_Gamma:
+	case VideoProcAmpProperty::VideoProcAmp_BacklightCompensation:
+	case VideoProcAmpProperty::VideoProcAmp_ColorEnable:
+	default:
+		hr = E_PROP_ID_UNSUPPORTED;
+		break;
+	}
+	return hr;
+}
