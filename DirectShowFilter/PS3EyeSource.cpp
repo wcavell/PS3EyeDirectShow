@@ -156,15 +156,16 @@ HRESULT __stdcall PS3EyeSource::GetPages(CAUUID *pPages)
 {
 	CheckPointer(pPages, E_POINTER);
 
-	pPages->cElems = 1;
-	pPages->pElems = (GUID*)CoTaskMemAlloc(sizeof(GUID));
+	pPages->cElems = 2;
+	pPages->pElems = (GUID*)CoTaskMemAlloc(sizeof(GUID) * 2);
 	CheckPointer(pPages->pElems, E_OUTOFMEMORY);
 	pPages->pElems[0] = CLSID_VideoProcAmpPropertyPage;
+	pPages->pElems[1] = CLSID_CameraControlPropertyPage;
 
 	return S_OK;
 }
 
-HRESULT __stdcall PS3EyeSource::GetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags)
+HRESULT __stdcall PS3EyeSource::VideoProcAmpGetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags)
 {
 	CheckPointer(pMin, E_POINTER);
 	CheckPointer(pMax, E_POINTER);
@@ -234,9 +235,16 @@ HRESULT __stdcall PS3EyeSource::GetRange(long Property, long *pMin, long *pMax, 
 	return hr;
 }
 
-HRESULT __stdcall PS3EyeSource::Set(long Property, long lValue, long Flags)
+HRESULT __stdcall PS3EyeSource::VideoProcAmpSet(long Property, long lValue, long Flags)
 {
 	HRESULT hr = S_OK;
+
+	if (!_pin->GetDevice()->is_initialized())
+	{
+		hr = S_FALSE;
+		return hr;
+	}
+
 	switch (Property)
 	{
 	case VideoProcAmpProperty::VideoProcAmp_Brightness:
@@ -288,7 +296,7 @@ HRESULT __stdcall PS3EyeSource::Set(long Property, long lValue, long Flags)
 	return hr;
 }
 
-HRESULT __stdcall PS3EyeSource::Get(long Property, long *lValue, long *Flags)
+HRESULT __stdcall PS3EyeSource::VideoProcAmpGet(long Property, long *lValue, long *Flags)
 {
 	CheckPointer(lValue, E_POINTER);
 	CheckPointer(Flags, E_POINTER);
@@ -341,6 +349,73 @@ HRESULT __stdcall PS3EyeSource::Get(long Property, long *lValue, long *Flags)
 	case VideoProcAmpProperty::VideoProcAmp_Gamma:
 	case VideoProcAmpProperty::VideoProcAmp_BacklightCompensation:
 	case VideoProcAmpProperty::VideoProcAmp_ColorEnable:
+	default:
+		hr = E_PROP_ID_UNSUPPORTED;
+		break;
+	}
+	return hr;
+}
+
+HRESULT __stdcall PS3EyeSource::CameraControlGetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags)
+{
+	CheckPointer(pMin, E_POINTER);
+	CheckPointer(pMax, E_POINTER);
+	CheckPointer(pSteppingDelta, E_POINTER);
+	CheckPointer(pDefault, E_POINTER);
+	CheckPointer(pCapsFlags, E_POINTER);
+
+	HRESULT hr = S_OK;
+	switch (Property)
+	{
+	case CameraControlProperty::CameraControl_Exposure:
+		*pMin = 0;
+		*pMax = 255;
+		*pSteppingDelta = 1;
+		*pDefault = 255;
+		*pCapsFlags = CameraControlFlags::CameraControl_Flags_Manual;
+		break;
+	default:
+		hr = E_PROP_ID_UNSUPPORTED;
+		break;
+	}
+	return hr;
+}
+
+HRESULT __stdcall PS3EyeSource::CameraControlSet(long Property, long lValue, long Flags)
+{
+	HRESULT hr = S_OK;
+
+	if (!_pin->GetDevice()->is_initialized())
+	{
+		hr = S_FALSE;
+		return hr;
+	}
+
+	switch (Property)
+	{
+	case CameraControlProperty::CameraControl_Exposure:
+		_pin->GetDevice()->set_exposure((int)lValue);
+		break;
+	default:
+		hr = E_PROP_ID_UNSUPPORTED;
+		break;
+	}
+	return hr;
+}
+
+HRESULT __stdcall PS3EyeSource::CameraControlGet(long Property, long *lValue, long *Flags)
+{
+	CheckPointer(lValue, E_POINTER);
+	CheckPointer(Flags, E_POINTER);
+
+	HRESULT hr = S_OK;
+
+	switch (Property)
+	{
+	case CameraControlProperty::CameraControl_Exposure:
+		*lValue = _pin->GetDevice()->exposure();
+		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		break;
 	default:
 		hr = E_PROP_ID_UNSUPPORTED;
 		break;

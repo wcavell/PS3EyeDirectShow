@@ -12,6 +12,58 @@
 
 class PS3EyePushPin;
 
+class IAMVideoProcAmpWrapper : public IAMVideoProcAmp
+{
+public:
+	virtual HRESULT __stdcall VideoProcAmpGetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags) = 0;
+
+	virtual HRESULT __stdcall VideoProcAmpSet(long Property, long lValue, long Flags) = 0;
+
+	virtual HRESULT __stdcall VideoProcAmpGet(long Property, long *lValue, long *Flags) = 0;
+
+	// Inherited via IAMVideoProcAmp
+	virtual HRESULT __stdcall GetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags)
+	{
+		return VideoProcAmpGetRange(Property, pMin, pMax, pSteppingDelta, pDefault, pCapsFlags);
+	}
+
+	virtual HRESULT __stdcall Set(long Property, long lValue, long Flags)
+	{
+		return VideoProcAmpSet(Property, lValue, Flags);
+	}
+
+	virtual HRESULT __stdcall Get(long Property, long *lValue, long *Flags)
+	{
+		return VideoProcAmpGet(Property, lValue, Flags);
+	}
+};
+
+class IAMCameraControlWrapper : public IAMCameraControl
+{
+public:
+	virtual HRESULT __stdcall CameraControlGetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags) = 0;
+
+	virtual HRESULT __stdcall CameraControlSet(long Property, long lValue, long Flags) = 0;
+
+	virtual HRESULT __stdcall CameraControlGet(long Property, long *lValue, long *Flags) = 0;
+
+	// Inherited via IAMVideoProcAmp
+	virtual HRESULT __stdcall GetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags)
+	{
+		return CameraControlGetRange(Property, pMin, pMax, pSteppingDelta, pDefault, pCapsFlags);
+	}
+
+	virtual HRESULT __stdcall Set(long Property, long lValue, long Flags)
+	{
+		return CameraControlSet(Property, lValue, Flags);
+	}
+
+	virtual HRESULT __stdcall Get(long Property, long *lValue, long *Flags)
+	{
+		return CameraControlGet(Property, lValue, Flags);
+	}
+};
+
 class PS3EyePushPin : public CSourceStream, public IKsPropertySet, public IAMStreamConfig
 {
 protected:
@@ -37,12 +89,6 @@ public:
 		}
 		else if (riid == IID_IAMStreamConfig) {
 			return GetInterface((IAMStreamConfig*)this, ppv);
-		}
-		else if (riid == IID_ISpecifyPropertyPages) {
-			return GetInterface((ISpecifyPropertyPages*)this, ppv);
-		}
-		else if (riid == IID_IAMVideoProcAmp) {
-			return GetInterface((IAMVideoProcAmp*)this, ppv);
 		}
 		return CSourceStream::NonDelegatingQueryInterface(riid, ppv);
 	}
@@ -83,7 +129,7 @@ public:
 	virtual HRESULT __stdcall GetStreamCaps(int iIndex, AM_MEDIA_TYPE ** ppmt, BYTE * pSCC) override;
 };
 
-class PS3EyeSource : public CSource, public ISpecifyPropertyPages, public IAMVideoProcAmp
+class PS3EyeSource : public CSource, public ISpecifyPropertyPages, public IAMVideoProcAmpWrapper, public IAMCameraControlWrapper
 {
 private:
 	PS3EyeSource(IUnknown *pUnk, HRESULT *phr, const GUID id, int index);
@@ -102,6 +148,9 @@ public:
 		else if (riid == IID_IAMVideoProcAmp) {
 			return GetInterface((IAMVideoProcAmp*)this, ppv);
 		}
+		else if (riid == IID_IAMCameraControl) {
+			return GetInterface((IAMCameraControl*)this, ppv);
+		}
 		return CSource::NonDelegatingQueryInterface(riid, ppv);
 	}
 
@@ -118,10 +167,17 @@ public:
 	// Inherited via ISpecifyPropertyPages
 	virtual HRESULT __stdcall GetPages(CAUUID *pPages) override;
 
-	// Inherited via IPS3EyeProperty
-	virtual HRESULT __stdcall GetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags) override;
+	// Inherited via IAMVideoProcAmpWrapper
+	virtual HRESULT __stdcall VideoProcAmpGetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags);
 
-	virtual HRESULT __stdcall Set(long Property, long lValue, long Flags) override;
+	virtual HRESULT __stdcall VideoProcAmpSet(long Property, long lValue, long Flags);
 
-	virtual HRESULT __stdcall Get(long Property, long *lValue, long *Flags) override;
+	virtual HRESULT __stdcall VideoProcAmpGet(long Property, long *lValue, long *Flags);
+
+	// Inherited via IAMCameraControlWrapper
+	virtual HRESULT __stdcall CameraControlGetRange(long Property, long *pMin, long *pMax, long *pSteppingDelta, long *pDefault, long *pCapsFlags);
+
+	virtual HRESULT __stdcall CameraControlSet(long Property, long lValue, long Flags);
+
+	virtual HRESULT __stdcall CameraControlGet(long Property, long *lValue, long *Flags);
 };
