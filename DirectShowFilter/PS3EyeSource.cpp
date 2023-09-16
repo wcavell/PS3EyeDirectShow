@@ -192,10 +192,10 @@ HRESULT __stdcall PS3EyeSource::VideoProcAmpGetRange(long Property, long *pMin, 
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Hue:
 		*pMin = 0;
-		*pMax = 128;
+		*pMax = 255;
 		*pSteppingDelta = 1;
-		*pDefault = 64;
-		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		*pDefault = 165;
+		*pCapsFlags = VideoProcAmpFlags::VideoProcAmp_Flags_Auto;
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Saturation:
 		*pMin = 0;
@@ -254,7 +254,15 @@ HRESULT __stdcall PS3EyeSource::VideoProcAmpSet(long Property, long lValue, long
 		_pin->GetDevice()->set_contrast((int)lValue);
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Hue:
-		_pin->GetDevice()->set_hue((int)lValue);
+		if (Flags == VideoProcAmpFlags::VideoProcAmp_Flags_Auto)
+		{
+			_pin->GetDevice()->set_auto_hue(TRUE);
+		}
+		else
+		{
+			_pin->GetDevice()->set_auto_hue(FALSE);
+			_pin->GetDevice()->set_hue((int)lValue);
+		}
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Saturation:
 		_pin->GetDevice()->set_saturation((int)lValue);
@@ -269,10 +277,10 @@ HRESULT __stdcall PS3EyeSource::VideoProcAmpSet(long Property, long lValue, long
 		}
 		else
 		{
-			_pin->GetDevice()->set_red_balance(lValue);
-			_pin->GetDevice()->set_green_balance(lValue);
-			_pin->GetDevice()->set_blue_balance(lValue);
 			_pin->GetDevice()->set_awb(FALSE);
+			_pin->GetDevice()->set_red_balance((int)lValue);
+			_pin->GetDevice()->set_green_balance((int)lValue);
+			_pin->GetDevice()->set_blue_balance((int)lValue);
 		}
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Gain:
@@ -282,8 +290,8 @@ HRESULT __stdcall PS3EyeSource::VideoProcAmpSet(long Property, long lValue, long
 		}
 		else
 		{
-			_pin->GetDevice()->set_gain(lValue);
 			_pin->GetDevice()->set_auto_gain(FALSE);
+			_pin->GetDevice()->set_gain((int)lValue);
 		}
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Gamma:
@@ -314,7 +322,14 @@ HRESULT __stdcall PS3EyeSource::VideoProcAmpGet(long Property, long *lValue, lon
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Hue:
 		*lValue = _pin->GetDevice()->hue();
-		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		if (_pin->GetDevice()->auto_hue())
+		{
+			*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Auto;
+		}
+		else
+		{
+			*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		}
 		break;
 	case VideoProcAmpProperty::VideoProcAmp_Saturation:
 		*lValue = _pin->GetDevice()->saturation();
@@ -372,7 +387,7 @@ HRESULT __stdcall PS3EyeSource::CameraControlGetRange(long Property, long *pMin,
 		*pMax = 255;
 		*pSteppingDelta = 1;
 		*pDefault = 255;
-		*pCapsFlags = CameraControlFlags::CameraControl_Flags_Manual;
+		*pCapsFlags = CameraControlFlags::CameraControl_Flags_Auto;
 		break;
 	default:
 		hr = E_PROP_ID_UNSUPPORTED;
@@ -394,7 +409,15 @@ HRESULT __stdcall PS3EyeSource::CameraControlSet(long Property, long lValue, lon
 	switch (Property)
 	{
 	case CameraControlProperty::CameraControl_Exposure:
-		_pin->GetDevice()->set_exposure((int)lValue);
+		if (Flags == CameraControlFlags::CameraControl_Flags_Auto)
+		{
+			_pin->GetDevice()->set_aec(TRUE);
+		}
+		else
+		{
+			_pin->GetDevice()->set_exposure((int)lValue);
+			_pin->GetDevice()->set_aec(FALSE);
+		}
 		break;
 	default:
 		hr = E_PROP_ID_UNSUPPORTED;
@@ -414,7 +437,14 @@ HRESULT __stdcall PS3EyeSource::CameraControlGet(long Property, long *lValue, lo
 	{
 	case CameraControlProperty::CameraControl_Exposure:
 		*lValue = _pin->GetDevice()->exposure();
-		*Flags = VideoProcAmpFlags::VideoProcAmp_Flags_Manual;
+		if (_pin->GetDevice()->aec())
+		{
+			*Flags = CameraControlFlags::CameraControl_Flags_Auto;
+		}
+		else
+		{
+			*Flags = CameraControlFlags::CameraControl_Flags_Manual;
+		}
 		break;
 	default:
 		hr = E_PROP_ID_UNSUPPORTED;
