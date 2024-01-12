@@ -37,11 +37,11 @@ extern "C" {
 	}
 	ONE_API void listDeviceDestroy(usb_t* usb)
 	{
-		const auto devices = usb->devices;
+		/*const auto devices = usb->devices;
 		for (auto device : devices)
 		{
 			delete device;
-		}
+		}*/
 		usb->devices.clear();
 		delete usb;
 		usb = nullptr;
@@ -221,11 +221,11 @@ extern "C" {
 	{
 		return cam->availableState();
 	}
-	ONE_API uint8_t GetPortNum(camera* cam)
+	ONE_API uint8_t getPortNum(camera* cam)
 	{
 		return libusb_get_bus_number(cam->device());
 	}
-	ONE_API uint8_t GetBusNum(camera* cam)
+	ONE_API uint8_t getBusNum(camera* cam)
 	{
 		return libusb_get_bus_number(cam->device());
 	}
