@@ -183,32 +183,32 @@ extern "C" {
 	ONE_API bool getUSBPortPath(camera* cam, char* out_identifier, size_t max_identifier_length) { return cam->usb_port(out_identifier, max_identifier_length); }
 	ONE_API bool getFrame(camera* cam, uint8_t* frame) { return cam->get_frame(frame); }
 
-	ONE_API uint32_t getWidth(camera* cam)
+	ONE_API int32_t getWidth(camera* cam)
 	{
 		if (cam == nullptr)
 			return 0;
 		return cam->width();
 	}
-	ONE_API uint32_t getHeight(camera* cam)
+	ONE_API int32_t getHeight(camera* cam)
 	{
 		if (cam == nullptr)
 			return 0;
 		return cam->height();
 	}
-	ONE_API uint16_t getFrameRate(camera* cam)
+	ONE_API int32_t getFrameRate(camera* cam)
 	{
 		if (cam == nullptr)
 			return 0;
 		return cam->framerate();
 	}
 	ONE_API void setFrameRate(camera* cam, int val) { return cam->set_framerate(val); }
-	ONE_API uint32_t getRowBytes(camera* cam)
+	ONE_API int32_t getRowBytes(camera* cam)
 	{
 		if (cam == nullptr)
 			return 0;
 		return cam->stride();
 	}
-	ONE_API uint32_t getOutputBytesPerPixel(camera* cam)
+	ONE_API int32_t getOutputBytesPerPixel(camera* cam)
 	{
 		if (cam == nullptr)
 			return 0;
@@ -221,11 +221,11 @@ extern "C" {
 	{
 		return cam->availableState();
 	}
-	ONE_API uint8_t getPortNum(camera* cam)
+	ONE_API int getPortNum(camera* cam)
 	{
 		return libusb_get_bus_number(cam->device());
 	}
-	ONE_API uint8_t getBusNum(camera* cam)
+	ONE_API int getBusNum(camera* cam)
 	{
 		return libusb_get_bus_number(cam->device());
 	}
